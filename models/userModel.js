@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false, // Hide this field from the output
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -61,6 +66,14 @@ userSchema.pre('save', async function (next) {
   // Delete passwordConfirm field
   this.passwordConfirm = undefined;
 
+  next();
+});
+
+//              👇 anything that begins with "find"
+userSchema.pre(/^find/, function (next) {
+  // this points to the current query
+  //                     ⬇️ != false. Not "active: true" because it may be missing.
+  this.find({ active: { $ne: false } }); 
   next();
 });
 
