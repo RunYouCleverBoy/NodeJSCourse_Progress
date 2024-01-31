@@ -35,6 +35,11 @@ const userSchema = new mongoose.Schema({
     },
   },
   passwordChangedAt: Date,
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'guide', 'lead-guide'],
+    default: 'user',
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -64,7 +69,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
       this.passwordChangedAt.getTime() / 1000,
       10
     );
-    return JWTTimestamp < changedTimestamp;
+    return JWTTimestamp < changedTimeStamp;
   }
   // False means NOT changed
   return false;
