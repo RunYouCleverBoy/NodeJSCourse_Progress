@@ -7,7 +7,7 @@ const AppError = require('./utils/appError');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
-const xssShiled = require('xss-shield');
+const { xss } = require('express-xss-sanitizer');
 const hpp = require('hpp');
 
 const app = express();
@@ -44,7 +44,7 @@ app.use((req, res, next) => {
 app.use(mongoSanitize());
 
 // Data sanitization against XSS
-app.use(xssShiled());
+app.use(xss());
 
 // Prevent parameter pollution
 app.use(
