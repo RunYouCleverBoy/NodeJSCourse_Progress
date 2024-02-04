@@ -1,6 +1,6 @@
-const fs = require('fs');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
+const handlerFactory = require('./handlerFactory');
 
 const filterObj = (obj, ...allowedFields) => {
   let newObj = {};
@@ -24,6 +24,11 @@ exports.checkID = async (req, res, next, val) => {
   next();
 };
 
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user POSTs password data
   if (req.body.password || req.body.passwordConfirm) {
@@ -35,10 +40,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   // 2) Update user document
   const filteredBody = filterObj(req.body, 'name', 'email');
-  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
-    new: true,
-    runValidators: true,
-  });
+  const updatedUser = factory.updateOne(User, req.user.id, filteredBody);
 
   res.status(200).json({
     status: 'success',
@@ -58,38 +60,10 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllUsers = catchAsync(async (req, res) => {
-  const users = await User.find();
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: {
-      users,
-    },
-  });
-});
+exports.getAllUsers = handlerFactory.getAll(User);
 
-exports.getUser = catchAsync(async (req, res) => {
-  let id = req.params.id;
-  const user = await User.findById(id);
-  res.status(200).json({
-    status: 'success',
-    data: {
-      user,
-    },
-  });
-});
-
-exports.postNewUser = catchAsync((req, res) => {
-  const user = User.create(req.body);
-  res.status(201).json({
-    status: 'success',
-    data: {
-      user,
-    },
-  });
-});
-
+exports.getUser = handlerFactory.getOne(User);
+exports.postNewUser = handlerFactory.createOne(User);
 exports.updateUser = catchAsync(async (req, res) => {
   const user = await User.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -97,10 +71,4 @@ exports.updateUser = catchAsync(async (req, res) => {
   });
 });
 
-exports.deleteUser = catchAsync(async (req, res) => {
-  await User.findByIdAndDelete(req.params.id);
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
+exports.deleteUser = handlerFactory.deleteOne(User);
