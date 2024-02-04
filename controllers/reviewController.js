@@ -1,5 +1,5 @@
 // Import necessary modules and models
-const Review = require('../models/review');
+const Review = require('../models/reviewModel');
 
 // Import necessary modules and models
 const catchAsync = require('../utils/catchAsync');
@@ -51,3 +51,5 @@ exports.setTourUserIds = (req, res, next) => {
     if (!req.body.user) req.body.user = req.user.id;
     next();
 }
+
+module.exports = router;
