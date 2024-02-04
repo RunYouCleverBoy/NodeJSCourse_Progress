@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
+const disableMiddleware = false;
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -51,22 +53,26 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password') || this.isNew) return next();
+  if (disableMiddleware) return next();
+
+  // Only run this function if password was actually modified
+  if (!this.isModified('password')) return next();
   
-  this.passwordChangedAt = Date.now() - 1000;
+  // Hash the password with cost of 12
+  this.password = await bcrypt.hash(this.password, 12);
+  
+  // Delete passwordConfirm field
+  this.passwordConfirm = undefined;
+  
+  next();
 });
 
 userSchema.pre('save', async function (next) {
-  // Only run this function if password was actually modified
-  if (!this.isModified('password')) return next();
-
-  // Hash the password with cost of 12
-  this.password = await bcrypt.hash(this.password, 12);
-
-  // Delete passwordConfirm field
-  this.passwordConfirm = undefined;
-
-  next();
+  if (disableMiddleware) return next();
+  
+  if (!this.isModified('password') || this.isNew) return next();
+  
+  this.passwordChangedAt = Date.now() - 1000;
 });
 
 //              👇 anything that begins with "find"
