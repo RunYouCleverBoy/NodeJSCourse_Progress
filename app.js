@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const toursRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
+const reviewRouter = require('./routes/reviewRouter');
 const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 const rateLimit = require('express-rate-limit');
@@ -63,6 +64,7 @@ app.use(
 // Routes
 app.use('/api/v1/tours', toursRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 // Error handling
 app.all('*', (req, res, next) => {
