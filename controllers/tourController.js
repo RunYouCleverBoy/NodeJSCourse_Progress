@@ -6,7 +6,7 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
 exports.getTour = catchAsync(async (req, res, next) => {
-  let tour = await Tour.findById(req.params.id);
+  let tour = await Tour.findById(req.params.id).populate('reviews');
   if (!tour) {
     return next(new AppError('No tour found with that ID', 404));
   }
